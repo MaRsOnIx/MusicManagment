@@ -1,0 +1,31 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+
+    <style>
+
+        body{
+            text-align: center;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+        <p style="font-size: 40px;">Witaj, <span th:text="${name}"/>!</p>
+
+        <p>Wyszukiwarka</p>
+        <form th:action="@{/search}"method="post">
+            <input placeholder="Nazwa" name="content"> <br /><br />
+            <select name="type"><option value="TRACK">Utwór</option><option value="ARTIST">Autora</option></select> <br /><br />
+            <input type="submit" value="Wyszukaj">
+        </form>
+
+
+</body>
+
+
+</html>

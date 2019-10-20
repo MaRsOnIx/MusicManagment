@@ -1,0 +1,244 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script th:inline="javascript">
+        let audio;
+        let recent;
+        const play = 'https://img.icons8.com/color/64/000000/play.png';
+        const stop = 'https://img.icons8.com/color/64/000000/stop.png';
+        $( document ).ready(function() {
+
+            $(".show2").click(function(){
+                if(recent!=null){
+                    $(recent).find("img").attr('src', play);
+                    audio[0].pause();
+
+                }
+                audio = $(this).find("audio");
+
+
+
+                if(recent==null){
+                    audio[0].play();
+                    $(this).find("img").attr('src', stop);
+                    recent=this;
+                }else{
+                    audio[0].pause();
+                    $(this).find("img").attr('src', play);
+                    recent=null;
+                }
+            });
+
+
+        });
+    //    var container = /*[[${container}]]*/ 'container';
+
+
+    </script>
+    <style>
+
+        h1{
+            text-align: center;
+            color: white;
+            background: black;
+            width: 100%;
+        }
+        .photo2 img{
+            width: 60px;
+            height: 60px;
+        }
+
+        .menucontainer {
+            background-color: black;
+            color: white;
+            overflow: auto;
+            height: 800px;
+
+
+        }
+
+        .photo {
+            background: #333333;
+            width: 20%;
+            float: left;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .name {
+            width: 20%;
+            float: left;
+            background-color: #333333;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .artist {
+            width: 20%;
+            float: left;
+            background-color: #333333;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .popularity {
+            background-color: #333333;
+            width: 20%;
+            float: left;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .show {
+            background-color: #333333;
+            width: 10%;
+            float: left;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .rate {
+            background-color: #333333;
+            width: 10%;
+            float: left;
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .photo2 {
+
+
+            width: 20%;
+            float: left;
+            height: 60px;
+            text-align: center;
+            display: table-cell;
+            vertical-align: middle;
+            /*padding-top: 15px;*/
+            font-size: 15px;
+            font-weight: bold;
+            color:white;
+        }
+
+        .name2 {
+            width: 20%;
+            float: left;
+            height: 60px;
+            text-align: center;
+            display: table-cell;
+            vertical-align: middle;
+            padding-top: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            color:white;
+        }
+
+        .artist2 {
+            width: 20%;
+            float: left;
+            height: 60px;
+            text-align: center;
+            display: table-cell;
+            vertical-align: middle;
+            padding-top: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            color:white;
+        }
+
+        .popularity2 {
+            width: 20%;
+            float: left;
+            height: 60px;
+            text-align: center;
+            padding-top: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            color:white;
+        }
+
+        .show2 {
+            width: 10%;
+            float: left;
+            height: 60px;
+            text-align: center;
+            padding-top: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            color:white;
+            cursor: pointer;
+        }
+        .rate2{
+            width: 10%;
+            float: left;
+            height: 60px;
+            text-align: center;
+            padding-top: 15px;
+            font-size: 15px;
+            font-weight: bold;
+            color:white;
+            cursor: pointer;
+        }
+
+
+
+        input[type="submit"] {
+            border: none;
+            background-color: #333333;
+            color: white;
+            padding-top: 4px;
+            font-weight: bold;
+        }
+
+
+
+
+
+
+
+    </style>
+
+</head>
+
+<body>
+
+<div id ="banner">
+
+    <a href="/">Strona główna</a>
+
+
+</div>
+<h1>Wyszukane utwory dla: <b th:text="${container.getContent()}" /></h1>
+<div class="menucontainer"><div class="photo">Zdjęcie</div> <div class="name">Nazwa</div> <div class="artist">Artysta</div> <div class="popularity">Popularność</div> <div class="show">Odsłuchaj</div><div class="rate">Zapisz</div>
+<div name="row" th:each="item: ${container.getItems()}">
+
+
+    <div class="photo2"> <img th:src="${item.getImage()}" /></div>
+    <div class="name2" th:text="${item.getName()}"></div>
+    <div class="artist2" th:text="${item.getArtists()}">
+    </div>
+    <div class="popularity2">
+        <img th:each="i: ${#numbers.sequence(0, item.getPopularity(), 1)}" src="https://img.icons8.com/doodle/32/000000/star--v2.png">
+    </div>
+    <div class="show2"> <audio th:src="${item.getLink()}"></audio>
+        <img src="https://img.icons8.com/color/64/000000/play.png"></div>
+    <div class="rate2">
+        <img src="https://img.icons8.com/plasticine/64/000000/likes-folder.png">
+    </div>
+</div>
+
+</div>
+
+
+
+</body>
+
+
+</html>
