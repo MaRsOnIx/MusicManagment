@@ -55,7 +55,7 @@
                     $.post("http://127.0.0.1:8080/farvoritesOperations/" + e.currentTarget.id, function (data) {
                         if (data == true) {
 
-                            v.html("<img src=\"https://img.icons8.com/flat_round/64/000000/delete-sign.png\">");
+                            v.html("<img src=\"https://img.icons8.com/plasticine/64/000000/filled-trash.png\">");
                             v.addClass("far");
                         }
                     });
@@ -259,8 +259,8 @@
     </div>
     <div class="show2"> <audio th:src="${item.getLink()}"></audio>
         <img src="https://img.icons8.com/color/64/000000/play.png"></div>
-    <div class="rate2" th:id="${item.getId()}">
-        <img src="https://img.icons8.com/plasticine/64/000000/likes-folder.png">
+    <div th:id="${item.getId()}" th:class="${item.isSaved()}? 'rate2 far' : 'rate2'">
+        <img th:src="${item.isSaved()}? 'https://img.icons8.com/plasticine/64/000000/filled-trash.png'  : 'https://img.icons8.com/plasticine/64/000000/likes-folder.png'">
     </div>
 </div>
 

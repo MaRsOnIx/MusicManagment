@@ -17,16 +17,12 @@ public class FarvoriteOperationsController {
 
     @PostMapping ("{id}")
     public boolean add(@PathVariable String id){
-        try{return userService.addNewTrack(id, userService.getUserId());}catch (TrackNotFoundException ev){
-            return false;
-        }
+        return userService.addNewTrack(id);
     }
 
     @DeleteMapping ("{id}")
     public boolean delete(@PathVariable String id){
-        try{return userService.deleteTrack(id, userService.getUserId());}catch (TrackNotFoundException ev){
-            return false;
-        }
+        return userService.deleteTrack(id);
     }
 
 }

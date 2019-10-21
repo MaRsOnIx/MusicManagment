@@ -4,7 +4,7 @@ import me.marsonix.spotifyapitest.logger.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
 
-public class SpotifyConnectionException extends RuntimeException {
+public class SpotifyConnectionException extends Exception {
 
     @Autowired
     private LogManager logManager;

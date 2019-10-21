@@ -40,7 +40,7 @@ public class SpotifyAPI {
 
 
 
-    private Optional<char[]> getBasicEncodedKey(){
+    private Optional<char[]> getBasicEncodedKey() throws MissingPropertyException {
 
         return Optional.of(Base64.getEncoder()
                 .encodeToString(String.join("",
@@ -54,7 +54,7 @@ public class SpotifyAPI {
 
     private Optional<String> token = Optional.empty();
 
-    private String generateNewToken() throws IOException {
+    private String generateNewToken() throws IOException, MissingPropertyException {
 
         String code = String.valueOf(getBasicEncodedKey().get());
         CloseableHttpClient client = HttpClients.createDefault();
@@ -72,7 +72,7 @@ public class SpotifyAPI {
         return jsonNode.get("access_token").asText();
     }
 
-    public Container getItem(Search search) throws IOException {
+    public Container getItem(Search search) throws IOException, MissingPropertyException {
         return getItemsFroumUrl("https://api.spotify.com/v1/search?q=" +
                 URLEncoder.encode(search.getContent(), "UTF-8") +
                 "&type="+search.getType().name().toLowerCase()+"&limit=" +
@@ -81,13 +81,13 @@ public class SpotifyAPI {
                 search.getOffset(), search);
         }
 
-   public Track getTrack(String id) throws IOException {
+   public Track getTrack(String id) throws IOException, TrackNotFoundException, MissingPropertyException {
         return getTrackFromJson(getRespondedJson("https://api.spotify.com/v1/tracks/"+id));
     }
 
 
 
-    private JsonNode getRespondedJson(String url) throws IOException {
+    private JsonNode getRespondedJson(String url) throws IOException, MissingPropertyException {
         if(!token.isPresent())token=Optional.of(generateNewToken());
 
         HttpClient client = HttpClientBuilder.create().build();
@@ -108,7 +108,7 @@ public class SpotifyAPI {
         return objectMapper.readTree(rd.lines().collect(Collectors.joining()));
     }
 
-    private Container getItemsFroumUrl(String url, Search search) throws IOException {
+    private Container getItemsFroumUrl(String url, Search search) throws IOException, MissingPropertyException {
 
 
         if(search.getType()==Type.TRACK) return jsonTracksToContainer(getRespondedJson(url), search.getContent(), search.getType());
@@ -153,7 +153,7 @@ public class SpotifyAPI {
 
     }
 
-    private Track getTrackFromJson(JsonNode nextValue){
+    private Track getTrackFromJson(JsonNode nextValue) throws TrackNotFoundException {
         String id = Optional.ofNullable(nextValue.get("id").asText()).orElseThrow( () -> new TrackNotFoundException("Track doesn't find.") );
         Optional<String> name = Optional.ofNullable(nextValue.get("name").asText());
         Optional<Integer> popularity = Optional.of(nextValue.get("popularity").asInt());

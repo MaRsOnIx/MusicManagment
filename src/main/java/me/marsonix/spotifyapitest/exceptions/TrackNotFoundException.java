@@ -3,7 +3,7 @@ package me.marsonix.spotifyapitest.exceptions;
 import me.marsonix.spotifyapitest.logger.LogManager;
 import org.springframework.beans.factory.annotation.Autowired;
 
-public class TrackNotFoundException extends RuntimeException {
+public class TrackNotFoundException extends Exception {
 
     @Autowired
     private LogManager logManager;

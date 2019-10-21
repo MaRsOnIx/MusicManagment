@@ -1,5 +1,7 @@
 package me.marsonix.spotifyapitest.services;
 
+import me.marsonix.spotifyapitest.exceptions.MissingPropertyException;
+import me.marsonix.spotifyapitest.exceptions.TrackNotFoundException;
 import me.marsonix.spotifyapitest.models.spotify.Track;
 import me.marsonix.spotifyapitest.models.user.User;
 import me.marsonix.spotifyapitest.repo.UserRepository;
@@ -17,35 +19,36 @@ import java.util.List;
 public class UserService {
 
     @Autowired
-    SpotifyAPI spotifyAPI;
+    private SpotifyAPI spotifyAPI;
     @Autowired
-    UserRepository userRepository;
+    private UserRepository userRepository;
 
     public List<Track>getFarvoritesTracks(String id){
         return userRepository.findFarvoriteTracksById(id);
     }
-    public boolean addNewTrack(String trackId, String userId){
+    public boolean addNewTrack(String trackId){
         try {
-            User user = userRepository.findById(userId);
+            User user = userRepository.findById(getUserId());
             Track track = spotifyAPI.getTrack(trackId);
             return user.getFarvoriteTracks().contains(track)
                     ? false : user.getFarvoriteTracks().add(track);
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | TrackNotFoundException | MissingPropertyException e) {
         }
         return false;
     }
 
-    public boolean deleteTrack(String trackId, String userId){
+    public boolean deleteTrack(String trackId){
         try {
-            User user = userRepository.findById(userId);
+            User user = userRepository.findById(getUserId());
             Track track = spotifyAPI.getTrack(trackId);
             return user.getFarvoriteTracks().contains(track)
                     ?  user.getFarvoriteTracks().remove(track) : false;
-        } catch (IOException e) {
-            e.printStackTrace();
+        } catch (IOException | TrackNotFoundException | MissingPropertyException e) {
         }
         return false;
+    }
+    public boolean containsTrack(Track track){
+       return userRepository.findById(getUserId()).getFarvoriteTracks().contains(track);
     }
 
     public String getUserId(){

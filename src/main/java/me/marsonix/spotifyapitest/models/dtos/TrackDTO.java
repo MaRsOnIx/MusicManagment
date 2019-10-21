@@ -17,6 +17,7 @@ public class TrackDTO {
         private String link;
         private String artists;
         private int popularity;
+        private boolean saved;
 
 
 

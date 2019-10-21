@@ -1,5 +1,6 @@
 package me.marsonix.spotifyapitest.services;
 
+import me.marsonix.spotifyapitest.exceptions.MissingPropertyException;
 import me.marsonix.spotifyapitest.models.spotify.Artist;
 import me.marsonix.spotifyapitest.models.spotify.Container;
 import me.marsonix.spotifyapitest.models.spotify.Search;
@@ -21,11 +22,13 @@ public class SearchService {
 
     @Autowired
     private SpotifyAPI spotifyAPI;
+    @Autowired
+    private UserService userService;
 
     // I see that it should be refactored but my time is limited, it will be done in the future
     // I demanded more time for refactoring in SpotifyAPI
 
-    public ContainerTrackDTO getTracks(Search search) throws IOException{
+    public ContainerTrackDTO getTracks(Search search) throws IOException, MissingPropertyException {
         Container container = spotifyAPI.getItem(search);
         return ContainerTrackDTO.builder()
                 .content(container.getContent())
@@ -41,13 +44,14 @@ public class SearchService {
     }
 
     public TrackDTO trackToTransfer(Track v){
-
+        boolean saved = userService.containsTrack(v);
         return TrackDTO.builder()
                 .name(v.getName())
                 .id(v.getId())
                 .popularity(v.getPopularity()/10)
                 .image(v.getImage())
                 .link(v.getLink())
+                .saved(saved)
                 .artists(v.getArtists().stream()
                         .map(Artist::getName)
                         .collect(Collectors.joining(", "))
@@ -55,7 +59,7 @@ public class SearchService {
     }
 
 
-    public ContainerArtistDTO getArtists(Search search) throws IOException{
+    public ContainerArtistDTO getArtists(Search search) throws IOException, MissingPropertyException {
         Container container = spotifyAPI.getItem(search);
 
         return ContainerArtistDTO.builder()
