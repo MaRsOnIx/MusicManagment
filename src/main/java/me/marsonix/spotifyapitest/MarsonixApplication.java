@@ -1,6 +1,5 @@
 package me.marsonix.spotifyapitest;
 
-import me.marsonix.spotifyapitest.models.Search;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

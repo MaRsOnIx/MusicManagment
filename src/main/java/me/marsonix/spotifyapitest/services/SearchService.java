@@ -1,9 +1,9 @@
 package me.marsonix.spotifyapitest.services;
 
-import me.marsonix.spotifyapitest.models.Artist;
-import me.marsonix.spotifyapitest.models.Container;
-import me.marsonix.spotifyapitest.models.Search;
-import me.marsonix.spotifyapitest.models.Track;
+import me.marsonix.spotifyapitest.models.spotify.Artist;
+import me.marsonix.spotifyapitest.models.spotify.Container;
+import me.marsonix.spotifyapitest.models.spotify.Search;
+import me.marsonix.spotifyapitest.models.spotify.Track;
 import me.marsonix.spotifyapitest.models.dtos.ArtistDTO;
 import me.marsonix.spotifyapitest.models.dtos.ContainerArtistDTO;
 import me.marsonix.spotifyapitest.models.dtos.ContainerTrackDTO;
@@ -23,30 +23,37 @@ public class SearchService {
     private SpotifyAPI spotifyAPI;
 
     // I see that it should be refactored but my time is limited, it will be done in the future
+    // I demanded more time for refactoring in SpotifyAPI
 
     public ContainerTrackDTO getTracks(Search search) throws IOException{
         Container container = spotifyAPI.getItem(search);
-//        spotifyAPI.getTrack("3n3Ppam7vgaVa1iaRUc9Lp");
         return ContainerTrackDTO.builder()
                 .content(container.getContent())
                 .total(container.getTotal())
                 .nextUrl(container.getNextUrl())
                 .previousUrl(container.getPreviousUrl())
                 .items(
-                       container.getItems().stream().map(val -> (Track) val)
-                               .map(v -> TrackDTO.builder()
-                                       .name(v.getName())
-                                       .popularity(v.getPopularity()/10)
-                                       .image(v.getImage())
-                                       .link(v.getLink())
-                                       .artists(v.getArtists().stream()
-                                               .map(Artist::getName)
-                                               .collect(Collectors.joining(", "))
-                                       )
-                                       .build()).collect(Collectors.toList()))
+                       container.getItems().stream().map(v ->
+                               trackToTransfer((Track) v))
+                                       .collect(Collectors.toList()))
 
                 .build();
     }
+
+    public TrackDTO trackToTransfer(Track v){
+
+        return TrackDTO.builder()
+                .name(v.getName())
+                .id(v.getId())
+                .popularity(v.getPopularity()/10)
+                .image(v.getImage())
+                .link(v.getLink())
+                .artists(v.getArtists().stream()
+                        .map(Artist::getName)
+                        .collect(Collectors.joining(", "))
+                ).build();
+    }
+
 
     public ContainerArtistDTO getArtists(Search search) throws IOException{
         Container container = spotifyAPI.getItem(search);

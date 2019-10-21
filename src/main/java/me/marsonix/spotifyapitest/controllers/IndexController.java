@@ -19,8 +19,8 @@ public class IndexController {
                 .getAuthentication())
                 .getUserAuthentication())
                 .getDetails();
-        String name = details.values().toArray()[1].toString();
 
+        String name = details.values().toArray()[1].toString();
         model.addAttribute("name", name);
         return "index";
     }

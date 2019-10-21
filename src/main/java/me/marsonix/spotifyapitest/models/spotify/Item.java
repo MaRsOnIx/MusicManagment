@@ -1,4 +1,4 @@
-package me.marsonix.spotifyapitest.models;
+package me.marsonix.spotifyapitest.models.spotify;
 
 
 public interface Item {

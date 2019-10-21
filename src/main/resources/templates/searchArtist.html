@@ -180,7 +180,6 @@
             float: left;
             height: 60px;
             text-align: center;
-            padding-top: 15px;
             font-size: 15px;
             font-weight: bold;
             color:white;
@@ -216,7 +215,7 @@
 
 </div>
 <h1>Wyszukani artyści dla: <b th:text="${container.getContent()}" /></h1>
-<div class="menucontainer"><div class="photo">Zdjęcie</div> <div class="name">Nazwa</div> <div class="followers">Obserwujący</div> <div class="popularity">Popularność</div> <div class="show">Profil</div><div class="rate">Album</div>
+<div class="menucontainer"><div class="photo">Zdjęcie</div> <div class="name">Nazwa</div> <div class="followers">Obserwujący</div> <div class="popularity">Popularność</div> <div class="show">Profil</div><div class="rate">Top Utwory</div>
     <div name="row" th:each="item: ${container.getItems()}">
 
 
@@ -227,7 +226,7 @@
         <div class="popularity2">
             <img th:each="i: ${#numbers.sequence(0, item.getPopularity(), 1)}" src="https://img.icons8.com/doodle/32/000000/star--v2.png">
         </div>
-        <div class="show2"> <a th:href="${item.getLink()}">
+        <div class="show2"> <a th:href="${item.getLink()}" target="_blank">
 
             <img src="https://img.icons8.com/officel/40/000000/edit-user-female.png">
         </a>
@@ -235,7 +234,7 @@
 
         </div>
         <div class="rate2">
-            <img src="https://img.icons8.com/plasticine/64/000000/likes-folder.png">
+            <img src="https://img.icons8.com/office/40/000000/rating.png">
         </div>
 
     </div>

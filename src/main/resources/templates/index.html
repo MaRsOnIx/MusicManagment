@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
 
 <head>
 
@@ -7,6 +7,13 @@
 
         body{
             text-align: center;
+        }
+        #search, #fav{
+            border: dotted;
+            margin-bottom: 30px;
+        }
+        input{
+            margin-bottom: 10px;
         }
 
     </style>
@@ -17,13 +24,23 @@
 
         <p style="font-size: 40px;">Witaj, <span th:text="${name}"/>!</p>
 
-        <p>Wyszukiwarka</p>
-        <form th:action="@{/search}"method="post">
-            <input placeholder="Nazwa" name="content"> <br /><br />
-            <select name="type"><option value="TRACK">Utwór</option><option value="ARTIST">Autora</option></select> <br /><br />
-            <input type="submit" value="Wyszukaj">
-        </form>
+        <div id="search">
+            <p>Wyszukiwarka</p>
+            <form th:action="@{/search}"method="get">
+                <input placeholder="Nazwa" name="content"> <br /><br />
+                <select name="type"><option value="TRACK">Utwór</option><option value="ARTIST">Autora</option></select> <br /><br />
+                <input type="submit" value="Wyszukaj">
+            </form>
+        </div>
 
+        <div id="fav">
+            <p>Ulubione</p>
+            <form th:action="@{/farvorites}">
+                <input type="submit" value="Zobacz">
+            </form>
+        </div>
+
+        <p>// PS: Pierwszy raz korzystam z thymeleaf'a, cały backend zawsze opierałem Controllerach i JavaScripcie, a w dodatku mój czas jest ograniczony :/</p>
 
 </body>
 

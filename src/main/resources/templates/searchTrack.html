@@ -33,6 +33,36 @@
 
 
         });
+        $(document).ready(function() {
+            $('.rate2').click(function(e) {
+                var v = $('#' + e.currentTarget.id);
+                if (v.hasClass("far")) {
+
+                    $.ajax({
+                        url: "http://127.0.0.1:8080/farvoritesOperations/" + e.currentTarget.id,
+                        type: 'DELETE',
+                        success: function(data) {
+                            if (data == true) {
+
+                                v.html("<img src=\"https://img.icons8.com/plasticine/64/000000/likes-folder.png\">");
+                                v.removeClass("far");
+                            }
+                        }
+                    });
+
+
+                }else{
+                    $.post("http://127.0.0.1:8080/farvoritesOperations/" + e.currentTarget.id, function (data) {
+                        if (data == true) {
+
+                            v.html("<img src=\"https://img.icons8.com/flat_round/64/000000/delete-sign.png\">");
+                            v.addClass("far");
+                        }
+                    });
+            }
+            });
+        });
+
     //    var container = /*[[${container}]]*/ 'container';
 
 
@@ -229,7 +259,7 @@
     </div>
     <div class="show2"> <audio th:src="${item.getLink()}"></audio>
         <img src="https://img.icons8.com/color/64/000000/play.png"></div>
-    <div class="rate2">
+    <div class="rate2" th:id="${item.getId()}">
         <img src="https://img.icons8.com/plasticine/64/000000/likes-folder.png">
     </div>
 </div>

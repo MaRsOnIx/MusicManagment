@@ -1,10 +1,10 @@
 package me.marsonix.spotifyapitest.utilis;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.marsonix.spotifyapitest.exceptions.MissingPropertyException;
-import me.marsonix.spotifyapitest.models.*;
+import me.marsonix.spotifyapitest.exceptions.TrackNotFoundException;
+import me.marsonix.spotifyapitest.models.spotify.*;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -17,7 +17,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 
-import javax.swing.text.html.Option;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -82,13 +81,10 @@ public class SpotifyAPI {
                 search.getOffset(), search);
         }
 
-//   public void getTrack(String id) throws IOException {
-//        testujeSobie(getRespondedJson("https://api.spotify.com/v1/tracks/"+id));
-//    }
-//
-//    public void testujeSobie(JsonNode node){
-//        System.out.println(node);
-//    }
+   public Track getTrack(String id) throws IOException {
+        return getTrackFromJson(getRespondedJson("https://api.spotify.com/v1/tracks/"+id));
+    }
+
 
 
     private JsonNode getRespondedJson(String url) throws IOException {
@@ -145,7 +141,11 @@ public class SpotifyAPI {
             JsonNode items = tracks.get("items");
 
             for (JsonNode nextValue : items) {
-                itemList.add(getTrack(nextValue));
+                try {
+                    itemList.add(getTrackFromJson(nextValue));
+                }catch (TrackNotFoundException ev){
+
+                }
             }
         }
 
@@ -153,8 +153,8 @@ public class SpotifyAPI {
 
     }
 
-    private Track getTrack(JsonNode nextValue){
-        Optional<String> id = Optional.ofNullable(nextValue.get("id").asText());
+    private Track getTrackFromJson(JsonNode nextValue){
+        String id = Optional.ofNullable(nextValue.get("id").asText()).orElseThrow( () -> new TrackNotFoundException("Track doesn't find.") );
         Optional<String> name = Optional.ofNullable(nextValue.get("name").asText());
         Optional<Integer> popularity = Optional.of(nextValue.get("popularity").asInt());
         Optional<String> link = Optional.ofNullable(nextValue.get("preview_url").asText());
@@ -175,7 +175,7 @@ public class SpotifyAPI {
             image=getImageFromJson(album);
         }
 
-        return Track.builder().id(id.orElse("")).image(image.orElse("")).name(name.orElse("")).artists(artists).link(link.orElse("")).popularity(popularity.orElse(0)).build();
+        return Track.builder().id(id).image(image.orElse("")).name(name.orElse("")).artists(artists).link(link.orElse("")).popularity(popularity.orElse(0)).build();
     }
 
 
