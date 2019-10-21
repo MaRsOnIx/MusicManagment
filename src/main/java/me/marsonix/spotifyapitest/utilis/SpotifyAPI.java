@@ -82,41 +82,42 @@ public class SpotifyAPI {
                 search.getOffset(), search);
         }
 
-//    public Container getArtists(Search search) throws IOException {
-//        return getItemsFroumUrl("https://api.spotify.com/v1/artists/?q=" +
-//                search.getContent() +
-//                "&type=track&limit=" +
-//                search.getLimit() +
-//                "&offset=" +
-//                search.getOffset());
+//   public void getTrack(String id) throws IOException {
+//        testujeSobie(getRespondedJson("https://api.spotify.com/v1/tracks/"+id));
+//    }
+//
+//    public void testujeSobie(JsonNode node){
+//        System.out.println(node);
 //    }
 
 
-    Container getItemsFroumUrl(String url, Search search) throws IOException {
+    private JsonNode getRespondedJson(String url) throws IOException {
+        if(!token.isPresent())token=Optional.of(generateNewToken());
 
-            if(!token.isPresent())token=Optional.of(generateNewToken());
+        HttpClient client = HttpClientBuilder.create().build();
+        HttpGet request = new HttpGet(url);
 
+        request.addHeader("User-Agent", USER_AGENT);
+        request.addHeader("Authorization", "Bearer " + token.get());
+        request.addHeader("Accept", "application/json");
+        HttpResponse response = client.execute(request);
 
-
-            HttpClient client = HttpClientBuilder.create().build();
-            HttpGet request = new HttpGet(url);
-
-            request.addHeader("User-Agent", USER_AGENT);
-            request.addHeader("Authorization", "Bearer " + token.get());
-            request.addHeader("Accept", "application/json");
-            HttpResponse response = client.execute(request);
-
-            switch(response.getStatusLine().getStatusCode()){
-                case 400:
-                case 401:
-                    generateNewToken();
-                    return getItemsFroumUrl(url, search);
-            }
-
+        switch(response.getStatusLine().getStatusCode()){
+            case 400:
+            case 401:
+                generateNewToken();
+                return getRespondedJson(url);
+        }
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        if(search.getType()==Type.TRACK) return jsonTracksToContainer(rd.lines().collect(Collectors.joining()), search.getContent(), search.getType());
+        return objectMapper.readTree(rd.lines().collect(Collectors.joining()));
+    }
 
-        return jsonArtistsToContainer(rd.lines().collect(Collectors.joining()), search.getContent(), search.getType());
+    private Container getItemsFroumUrl(String url, Search search) throws IOException {
+
+
+        if(search.getType()==Type.TRACK) return jsonTracksToContainer(getRespondedJson(url), search.getContent(), search.getType());
+
+        return jsonArtistsToContainer(getRespondedJson(url), search.getContent(), search.getType());
     }
 
 
@@ -133,9 +134,9 @@ public class SpotifyAPI {
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private Container jsonTracksToContainer(String json, String content, Type type) throws JsonProcessingException {
+    private Container jsonTracksToContainer(JsonNode json, String content, Type type) {
 
-        JsonNode tracks = objectMapper.readTree(json).get("tracks");
+        JsonNode tracks = json.get("tracks");
         Container container = createStandardContainer(content, tracks, type);
         int total = container.getTotal();
         List<Item> itemList = container.getItems();
@@ -144,28 +145,7 @@ public class SpotifyAPI {
             JsonNode items = tracks.get("items");
 
             for (JsonNode nextValue : items) {
-                Optional<String> id = Optional.ofNullable(nextValue.get("id").asText());
-                Optional<String> name = Optional.ofNullable(nextValue.get("name").asText());
-                Optional<Integer> popularity = Optional.of(nextValue.get("popularity").asInt());
-                Optional<String> link = Optional.ofNullable(nextValue.get("preview_url").asText());
-
-                Optional<String> image = Optional.empty();
-                List<Artist> artists = new ArrayList<>();
-
-                if (nextValue.hasNonNull("artists") && nextValue.get("artists").isArray()) {
-                    for (JsonNode nextArt : nextValue.get("artists")) {
-                        Optional<String> idArt = Optional.ofNullable(nextArt.get("id").asText());
-                        Optional<String> nameArt = Optional.ofNullable(nextArt.get("name").asText());
-                        artists.add(Artist.builder().id(idArt.orElse("")).name(nameArt.orElse("")).build());
-                    }
-                }
-
-                if (nextValue.hasNonNull("album")) {
-                    JsonNode album = nextValue.get("album");
-                    image=getImageFromJson(album);
-                }
-
-                itemList.add(Track.builder().id(id.orElse("")).image(image.orElse("")).name(name.orElse("")).artists(artists).link(link.orElse("")).popularity(popularity.orElse(0)).build());
+                itemList.add(getTrack(nextValue));
             }
         }
 
@@ -173,9 +153,36 @@ public class SpotifyAPI {
 
     }
 
-    private Container jsonArtistsToContainer(String json, String content, Type type) throws JsonProcessingException {
+    private Track getTrack(JsonNode nextValue){
+        Optional<String> id = Optional.ofNullable(nextValue.get("id").asText());
+        Optional<String> name = Optional.ofNullable(nextValue.get("name").asText());
+        Optional<Integer> popularity = Optional.of(nextValue.get("popularity").asInt());
+        Optional<String> link = Optional.ofNullable(nextValue.get("preview_url").asText());
 
-        JsonNode artists = objectMapper.readTree(json).get("artists");
+        Optional<String> image = Optional.empty();
+        List<Artist> artists = new ArrayList<>();
+
+        if (nextValue.hasNonNull("artists") && nextValue.get("artists").isArray()) {
+            for (JsonNode nextArt : nextValue.get("artists")) {
+                Optional<String> idArt = Optional.ofNullable(nextArt.get("id").asText());
+                Optional<String> nameArt = Optional.ofNullable(nextArt.get("name").asText());
+                artists.add(Artist.builder().id(idArt.orElse("")).name(nameArt.orElse("")).build());
+            }
+        }
+
+        if (nextValue.hasNonNull("album")) {
+            JsonNode album = nextValue.get("album");
+            image=getImageFromJson(album);
+        }
+
+        return Track.builder().id(id.orElse("")).image(image.orElse("")).name(name.orElse("")).artists(artists).link(link.orElse("")).popularity(popularity.orElse(0)).build();
+    }
+
+
+
+    private Container jsonArtistsToContainer(JsonNode json, String content, Type type)  {
+
+        JsonNode artists = json.get("artists");
         Container container = createStandardContainer(content, artists, type);
         int total = container.getTotal();
         List<Item> itemList = container.getItems();
@@ -222,10 +229,6 @@ public class SpotifyAPI {
     }
 
 
-
-    public static void main(String[] args) throws JsonProcessingException {
-        System.out.println(new SpotifyAPI().jsonArtistsToContainer("{\"artists\":{\"href\":\"https://api.spotify.com/v1/search?query=Adele&type=artist&market=PL&offset=0&limit=1\",\"items\":[{\"external_urls\":{\"spotify\":\"https://open.spotify.com/artist/4dpARuHxo51G3z768sgnrY\"},\"followers\":{\"href\":null,\"total\":17948207},\"genres\":[\"british soul\",\"pop\",\"uk pop\"],\"href\":\"https://api.spotify.com/v1/artists/4dpARuHxo51G3z768sgnrY\",\"id\":\"4dpARuHxo51G3z768sgnrY\",\"images\":[{\"height\":1000,\"url\":\"https://i.scdn.co/image/ccbe7b4fef679f821988c78dbd4734471834e3d9\",\"width\":1000},{\"height\":640,\"url\":\"https://i.scdn.co/image/f8737f6fda048b45efe91f81c2bda2b601ae689c\",\"width\":640},{\"height\":200,\"url\":\"https://i.scdn.co/image/df070ad127f62d682596e515ac69d5bef56e0897\",\"width\":200},{\"height\":64,\"url\":\"https://i.scdn.co/image/cbbdfb209cc38b2999b1882f42ee642555316313\",\"width\":64}],\"name\":\"Adele\",\"popularity\":84,\"type\":\"artist\",\"uri\":\"spotify:artist:4dpARuHxo51G3z768sgnrY\"}],\"limit\":1,\"next\":\"https://api.spotify.com/v1/search?query=Adele&type=artist&market=PL&offset=1&limit=1\",\"offset\":0,\"previous\":null,\"total\":212}}", "adele", Type.ARTIST));
-    }
 
 
 

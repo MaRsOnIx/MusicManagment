@@ -26,7 +26,7 @@ public class SearchService {
 
     public ContainerTrackDTO getTracks(Search search) throws IOException{
         Container container = spotifyAPI.getItem(search);
-
+//        spotifyAPI.getTrack("3n3Ppam7vgaVa1iaRUc9Lp");
         return ContainerTrackDTO.builder()
                 .content(container.getContent())
                 .total(container.getTotal())

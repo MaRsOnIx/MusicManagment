@@ -215,8 +215,8 @@
 
 
 </div>
-<h1>Wyszukane utwory dla: <b th:text="${container.getContent()}" /></h1>
-<div class="menucontainer"><div class="photo">Zdjęcie</div> <div class="name">Nazwa</div> <div class="followers">Obserwujący</div> <div class="popularity">Popularność</div> <div class="show">Odsłuchaj</div><div class="rate">Zapisz</div>
+<h1>Wyszukani artyści dla: <b th:text="${container.getContent()}" /></h1>
+<div class="menucontainer"><div class="photo">Zdjęcie</div> <div class="name">Nazwa</div> <div class="followers">Obserwujący</div> <div class="popularity">Popularność</div> <div class="show">Profil</div><div class="rate">Album</div>
     <div name="row" th:each="item: ${container.getItems()}">
 
 
@@ -232,9 +232,10 @@
             <img src="https://img.icons8.com/officel/40/000000/edit-user-female.png">
         </a>
 
-            <div class="rate2">
-                <img src="https://img.icons8.com/plasticine/64/000000/likes-folder.png">
-            </div>
+
+        </div>
+        <div class="rate2">
+            <img src="https://img.icons8.com/plasticine/64/000000/likes-folder.png">
         </div>
 
     </div>
