@@ -119,10 +119,13 @@ public class SpotifyAPI {
             case 400:
             case 401:
                 generateNewToken();
-                if(ai.getAndIncrement()>=10) try {
-                    throw new SpotifyConnectionException("Problem with getting token from WEB API Spotify.");
-                } catch (SpotifyConnectionException e) {
-                    e.printStackTrace();
+                if(ai.getAndIncrement()>=5) {
+                    try {
+                        throw new SpotifyConnectionException("Problem with connection of WEB API Spotify.");
+                    } catch (SpotifyConnectionException e) {
+                        e.printStackTrace();
+                    }
+                    return null;
                 }
                 return getRespondedJson(url);
         }
@@ -133,10 +136,11 @@ public class SpotifyAPI {
 
     private Container getItemsFroumUrl(String url, Search search) throws IOException {
 
+        JsonNode json = getRespondedJson(url);
+        if(json==null)return createStandardContainer("", objectMapper.createObjectNode(), search.getType());
+        if(search.getType()==Type.TRACK) return jsonTracksToContainer(json, search.getContent());
 
-        if(search.getType()==Type.TRACK) return jsonTracksToContainer(getRespondedJson(url), search.getContent());
-
-        return jsonArtistsToContainer(getRespondedJson(url), search.getContent(), search.getType());
+        return jsonArtistsToContainer(json, search.getContent(), search.getType());
     }
 
 

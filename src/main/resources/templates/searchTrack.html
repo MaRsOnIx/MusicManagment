@@ -39,7 +39,7 @@
                 if (v.hasClass("far")) {
 
                     $.ajax({
-                        url: "http://127.0.0.1:8080/farvoritesOperations/" + e.currentTarget.id,
+                        url: "farvoritesOperations/" + e.currentTarget.id,
                         type: 'DELETE',
                         success: function(data) {
                             if (data == true) {
@@ -52,10 +52,10 @@
 
 
                 }else{
-                    $.post("http://127.0.0.1:8080/farvoritesOperations/" + e.currentTarget.id, function (data) {
+                    $.post("farvoritesOperations/" + e.currentTarget.id, function (data) {
                         if (data == true) {
 
-                            v.html("<img src=\"https://img.icons8.com/flat_round/64/000000/delete-sign.png\">");
+                            v.html("<img src=\"https://img.icons8.com/plasticine/64/000000/filled-trash.png\">");
                             v.addClass("far");
                         }
                     });
