@@ -1,5 +1,6 @@
 package me.marsonix.spotifyapitest.utilis;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.marsonix.spotifyapitest.exceptions.MissingPropertyException;
@@ -140,7 +141,7 @@ public class SpotifyAPI {
         if(json==null)return createStandardContainer("", objectMapper.createObjectNode(), search.getType());
         if(search.getType()==Type.TRACK) return jsonTracksToContainer(json, search.getContent());
 
-        return jsonArtistsToContainer(json, search.getContent(), search.getType());
+        return jsonArtistsToContainer(json, search.getContent());
     }
 
 
@@ -150,7 +151,7 @@ public class SpotifyAPI {
         container.setItems(new ArrayList<>());
         container.setNextUrl(node.hasNonNull("next")?node.get("next").asText():"null");
         container.setPreviousUrl(node.hasNonNull("previous")?node.get("previous").asText():"null");
-        container.setTotal(node.hasNonNull("next")?node.get("total").asInt():-1);
+        container.setTotal(node.hasNonNull("total")?node.get("total").asInt():-1);
         container.setType(type);
         return container;
     }
@@ -210,10 +211,10 @@ public class SpotifyAPI {
 
 
 
-    private Container jsonArtistsToContainer(JsonNode json, String content, Type type)  {
+    private Container jsonArtistsToContainer(JsonNode json, String content)  {
 
         JsonNode artists = json.get("artists");
-        Container container = createStandardContainer(content, artists, type);
+        Container container = createStandardContainer(content, artists, Type.ARTIST);
         int total = container.getTotal();
         List<Item> itemList = container.getItems();
 
@@ -245,6 +246,7 @@ public class SpotifyAPI {
         return container;
 
     }
+
 
     private Optional<String> getImageFromJson(JsonNode json){
         if (json.hasNonNull("images") && json.get("images").isArray()) {
