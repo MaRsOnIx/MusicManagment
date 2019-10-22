@@ -11,16 +11,11 @@ import java.time.LocalDateTime;
 @Service
 public class LogManager {
 
+    @Autowired
     private LogRepository logRepository;
 
     @Autowired
     private UserService userService;
-
-    @Autowired
-    public LogManager(LogRepository logRepository){
-        this.logRepository=logRepository;
-    }
-
 
     public void userInfo(String message, Class cl){
         info("{"+userService.getUserId()+"} "+message, cl);
