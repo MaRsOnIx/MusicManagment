@@ -1,47 +1,68 @@
-<!DOCTYPE HTML>
-<html xmlns:th="http://www.thymeleaf.org" lang="pl">
-
-<head>
+<!DOCTYPE html>
+<!-- saved from url=(0026)http://pvp.iq.pl:8080/#_=_ -->
+<html lang="pl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
     <style>
 
         body{
             text-align: center;
-        }
-        #search, #fav{
-            border: dotted;
-            margin-bottom: 30px;
+			color:white;
         }
         input{
             margin-bottom: 10px;
         }
+		#caly_blok {
+		  font-size:24px;
+		}
+		#naglowek{
+		  background-color:black;
+		  text-align:center;
+		  display: block;
+		  font-size: 2em;
+		  margin-block-start: 0.67em;
+		  margin-block-end: 0.67em;
+		  margin-inline-start: 0px;
+		  margin-inline-end: 0px;
+		  font-weight: bold;
+		}
+		#stopka {
+		  clear:both;
+		  background-color:black;
+		  text-align:right;
+		  padding-right:50px;
+		  }
+		#srodek {
+			float:left;
+			background-color:#333;
+			width:100%;
+			min-height:150px;
+			}
+		a {
+		color: white;
+		}
+
 
     </style>
 
-</head>
+<link rel="prefetch"></head>
 
 <body>
 
-        <p style="font-size: 40px;">Witaj, <span th:text="${name}"/>!</p>
-
-        <div id="search">
-            <p>Wyszukiwarka</p>
-            <form th:action="@{/search}"method="get">
-                <input placeholder="Nazwa" name="content"> <br /><br />
-                <select name="type"><option value="TRACK">Utwór</option><option value="ARTIST">Autora</option></select> <br /><br />
+<div id="caly_blok">
+    <div id="naglowek"><b>Witaj, <span>Sławomir Rychłowski</span>!</b></div>
+    <div id="srodek"><p>Wyszukiwarka</p>
+            <form action="http://pvp.iq.pl:8080/search" method="get">
+                <input placeholder="Nazwa" name="content"> <br><br>
+                <select name="type"><option value="TRACK">Utwór</option><option value="ARTIST">Autora</option></select> <br><br>
                 <input type="submit" value="Wyszukaj">
             </form>
-        </div>
-
-        <div id="fav">
-            <p>Ulubione</p>
-            <form th:action="@{/farvorites}">
+			<p>Ulubione</p>
+            <form action="http://pvp.iq.pl:8080/farvorites">
                 <input type="submit" value="Zobacz">
             </form>
-        </div>
-
+			</div>
+    <div id="stopka"><a href="mailto:marsonixpl@gmail.com">marsonixpl@gmail.com</a></div>
+	</div>
 
 </body>
-
-
 </html>
