@@ -3,6 +3,7 @@ package me.marsonix.spotifyapitest.utilis;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import me.marsonix.spotifyapitest.exceptions.MissingPropertyException;
+import me.marsonix.spotifyapitest.exceptions.SpotifyConnectionException;
 import me.marsonix.spotifyapitest.exceptions.TrackNotFoundException;
 import me.marsonix.spotifyapitest.models.spotify.*;
 import org.apache.http.HttpResponse;
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpHeaders.USER_AGENT;
@@ -54,12 +56,22 @@ public class SpotifyAPI {
 
     private Optional<String> token = Optional.empty();
 
-    private String generateNewToken() throws IOException, MissingPropertyException {
+    private String generateNewToken() throws IOException {
 
-        String code = String.valueOf(getBasicEncodedKey().get());
+        String code = null;
+        try {
+            code = String.valueOf(getBasicEncodedKey().get());
+        } catch (MissingPropertyException e) {
+            e.printStackTrace();
+        }
         CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost request = new HttpPost(tokenUrl.orElseThrow(() ->
-                new MissingPropertyException("Property {security.oauth2.client.access-token-uri} is missing.")));
+        HttpPost request = null;
+        try {
+            request = new HttpPost(tokenUrl.orElseThrow(() ->
+                    new MissingPropertyException("Property {security.oauth2.client.access-token-uri} is missing.")));
+        } catch (MissingPropertyException e) {
+            e.printStackTrace();
+        }
 
         request.addHeader("Authorization", "Basic " + code);
         request.addHeader("Accept", "application/json");
@@ -72,7 +84,7 @@ public class SpotifyAPI {
         return jsonNode.get("access_token").asText();
     }
 
-    public Container getItem(Search search) throws IOException, MissingPropertyException {
+    public Container getItem(Search search) throws IOException{
         return getItemsFroumUrl("https://api.spotify.com/v1/search?q=" +
                 URLEncoder.encode(search.getContent(), "UTF-8") +
                 "&type="+search.getType().name().toLowerCase()+"&limit=" +
@@ -81,15 +93,20 @@ public class SpotifyAPI {
                 search.getOffset(), search);
         }
 
-   public Track getTrack(String id) throws IOException, TrackNotFoundException, MissingPropertyException {
+   public Track getTrack(String id) throws IOException, TrackNotFoundException {
         return getTrackFromJson(getRespondedJson("https://api.spotify.com/v1/tracks/"+id));
     }
 
 
+    public Container getTopTracksOfArtist(String artistId) throws IOException {
+        return jsonTracksToContainer(getRespondedJson("https://api.spotify.com/v1/artists/"+artistId+"/top-tracks?country=PL"),"Top");
+    }
 
-    private JsonNode getRespondedJson(String url) throws IOException, MissingPropertyException {
+
+    private AtomicInteger ai = new AtomicInteger();
+
+    private JsonNode getRespondedJson(String url) throws IOException{
         if(!token.isPresent())token=Optional.of(generateNewToken());
-
         HttpClient client = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(url);
 
@@ -102,16 +119,22 @@ public class SpotifyAPI {
             case 400:
             case 401:
                 generateNewToken();
+                if(ai.getAndIncrement()>=10) try {
+                    throw new SpotifyConnectionException("Problem with getting token from WEB API Spotify.");
+                } catch (SpotifyConnectionException e) {
+                    e.printStackTrace();
+                }
                 return getRespondedJson(url);
         }
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
+
         return objectMapper.readTree(rd.lines().collect(Collectors.joining()));
     }
 
-    private Container getItemsFroumUrl(String url, Search search) throws IOException, MissingPropertyException {
+    private Container getItemsFroumUrl(String url, Search search) throws IOException {
 
 
-        if(search.getType()==Type.TRACK) return jsonTracksToContainer(getRespondedJson(url), search.getContent(), search.getType());
+        if(search.getType()==Type.TRACK) return jsonTracksToContainer(getRespondedJson(url), search.getContent());
 
         return jsonArtistsToContainer(getRespondedJson(url), search.getContent(), search.getType());
     }
@@ -121,24 +144,24 @@ public class SpotifyAPI {
         Container container = new Container();
         container.setContent(content);
         container.setItems(new ArrayList<>());
-        container.setNextUrl(Optional.ofNullable(node.get("next").asText()).orElse("null"));
-        container.setPreviousUrl(Optional.ofNullable(node.get("previous").asText()).orElse("null"));
-        container.setTotal(node.get("total").asInt());
+        container.setNextUrl(node.hasNonNull("next")?node.get("next").asText():"null");
+        container.setPreviousUrl(node.hasNonNull("previous")?node.get("previous").asText():"null");
+        container.setTotal(node.hasNonNull("next")?node.get("total").asInt():-1);
         container.setType(type);
         return container;
     }
 
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private Container jsonTracksToContainer(JsonNode json, String content, Type type) {
+    private Container jsonTracksToContainer(JsonNode json, String content) {
 
         JsonNode tracks = json.get("tracks");
-        Container container = createStandardContainer(content, tracks, type);
+        Container container = createStandardContainer(content, tracks, Type.TRACK);
         int total = container.getTotal();
         List<Item> itemList = container.getItems();
 
-        if(total>0){
-            JsonNode items = tracks.get("items");
+        if(total!=0){
+            JsonNode items = total==-1?tracks:tracks.get("items");
 
             for (JsonNode nextValue : items) {
                 try {
@@ -154,19 +177,20 @@ public class SpotifyAPI {
     }
 
     private Track getTrackFromJson(JsonNode nextValue) throws TrackNotFoundException {
-        String id = Optional.ofNullable(nextValue.get("id").asText()).orElseThrow( () -> new TrackNotFoundException("Track doesn't find.") );
-        Optional<String> name = Optional.ofNullable(nextValue.get("name").asText());
-        Optional<Integer> popularity = Optional.of(nextValue.get("popularity").asInt());
-        Optional<String> link = Optional.ofNullable(nextValue.get("preview_url").asText());
+        if(!nextValue.hasNonNull("id"))throw new TrackNotFoundException("Track doesn't find.");
+        String id = nextValue.get("id").asText();
+        String name = nextValue.get("name").asText();
+        int popularity = nextValue.get("popularity").asInt();
+        String link = nextValue.get("preview_url").asText();
 
         Optional<String> image = Optional.empty();
         List<Artist> artists = new ArrayList<>();
 
         if (nextValue.hasNonNull("artists") && nextValue.get("artists").isArray()) {
             for (JsonNode nextArt : nextValue.get("artists")) {
-                Optional<String> idArt = Optional.ofNullable(nextArt.get("id").asText());
-                Optional<String> nameArt = Optional.ofNullable(nextArt.get("name").asText());
-                artists.add(Artist.builder().id(idArt.orElse("")).name(nameArt.orElse("")).build());
+                String idArt = nextArt.get("id").asText();
+                String nameArt = nextArt.get("name").asText();
+                artists.add(Artist.builder().id(idArt).name(nameArt).build());
             }
         }
 
@@ -175,7 +199,9 @@ public class SpotifyAPI {
             image=getImageFromJson(album);
         }
 
-        return Track.builder().id(id).image(image.orElse("")).name(name.orElse("")).artists(artists).link(link.orElse("")).popularity(popularity.orElse(0)).build();
+        return Track.builder().id(id).image(image.orElse(""))
+                .name(name).artists(artists).link(link)
+                .popularity(popularity).build();
     }
 
 
@@ -191,20 +217,20 @@ public class SpotifyAPI {
             JsonNode items = artists.get("items");
 
             for (JsonNode nextValue : items) {
-                Optional<String> id = Optional.ofNullable(nextValue.get("id").asText());
-                Optional<String> name = Optional.ofNullable(nextValue.get("name").asText());
-                Optional<Integer> popularity = Optional.of(nextValue.get("popularity").asInt());
-                Optional<Integer> followers = Optional.empty();
+                String id = nextValue.get("id").asText();
+                String name = nextValue.get("name").asText();
+                int popularity = nextValue.get("popularity").asInt();
+                int followers = 0;
                 Optional<String> image = getImageFromJson(nextValue);
                 Optional<String> link = Optional.empty();
                 if(nextValue.hasNonNull("external_urls") && nextValue.get("external_urls").hasNonNull("spotify")){
                     link=Optional.ofNullable(nextValue.get("external_urls").get("spotify").asText());
                 }
                 if(nextValue.hasNonNull("followers") && nextValue.get("followers").hasNonNull("total")){
-                    followers = Optional.of(nextValue.get("followers").get("total").asInt());
+                    followers = nextValue.get("followers").get("total").asInt();
                 }
 
-                itemList.add(Artist.builder().id(id.orElse("")).image(image.orElse("")).name(name.orElse("")).followers(followers.get()).link(link.orElse("")).popularity(popularity.orElse(0)).link(link.orElse("")).build());
+                itemList.add(Artist.builder().id(id).image(image.orElse("")).name(name).followers(followers).link(link.orElse("")).popularity(popularity).link(link.orElse("")).build());
 
             }
 

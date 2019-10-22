@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 
 import java.util.List;
 
+
 @Data
 @EqualsAndHashCode
 @Builder
@@ -17,7 +18,6 @@ public class Track implements Item {
     private String link;
     private List<Artist> artists;
     private int popularity;
-
 
 
 }

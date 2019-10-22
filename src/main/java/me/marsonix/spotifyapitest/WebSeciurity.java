@@ -15,7 +15,7 @@ public class WebSeciurity extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         //http .csrf().disable() .authorizeRequests() .anyRequest().permitAll();
-        http.csrf().disable().authorizeRequests().antMatchers("**").authenticated();
+        http.headers().frameOptions().disable().and().csrf().disable().authorizeRequests().antMatchers("**").authenticated();
       //  http.anonymous().disable().csrf().disable().oauth2Login().authorizationEndpoint();
     }
 }

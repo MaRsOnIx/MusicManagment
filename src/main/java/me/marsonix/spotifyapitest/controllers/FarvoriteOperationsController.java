@@ -1,7 +1,6 @@
 package me.marsonix.spotifyapitest.controllers;
 
 
-import me.marsonix.spotifyapitest.exceptions.TrackNotFoundException;
 import me.marsonix.spotifyapitest.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

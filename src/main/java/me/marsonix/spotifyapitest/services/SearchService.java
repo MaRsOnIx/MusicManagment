@@ -28,17 +28,23 @@ public class SearchService {
     // I see that it should be refactored but my time is limited, it will be done in the future
     // I demanded more time for refactoring in SpotifyAPI
 
-    public ContainerTrackDTO getTracks(Search search) throws IOException, MissingPropertyException {
-        Container container = spotifyAPI.getItem(search);
+    public ContainerTrackDTO getTracks(Search search) throws IOException {
+        return getTracks(spotifyAPI.getItem(search));
+    }
+
+
+    private ContainerTrackDTO getTracks(Container container){
+
+
         return ContainerTrackDTO.builder()
                 .content(container.getContent())
                 .total(container.getTotal())
                 .nextUrl(container.getNextUrl())
                 .previousUrl(container.getPreviousUrl())
                 .items(
-                       container.getItems().stream().map(v ->
-                               trackToTransfer((Track) v))
-                                       .collect(Collectors.toList()))
+                        container.getItems().stream().map(v ->
+                                trackToTransfer((Track) v))
+                                .collect(Collectors.toList()))
 
                 .build();
     }
@@ -59,7 +65,7 @@ public class SearchService {
     }
 
 
-    public ContainerArtistDTO getArtists(Search search) throws IOException, MissingPropertyException {
+    public ContainerArtistDTO getArtists(Search search) throws IOException {
         Container container = spotifyAPI.getItem(search);
 
         return ContainerArtistDTO.builder()
@@ -74,11 +80,17 @@ public class SearchService {
                                         .popularity(v.getPopularity()/10)
                                         .image(v.getImage())
                                         .link(v.getLink())
+                                        .id(v.getId())
                                         .followers(v.getFollowers())
 
                                         .build()).collect(Collectors.toList()))
 
                 .build();
+    }
+
+    public ContainerTrackDTO getTopTracks(String artistId) throws IOException {
+        return getTracks(spotifyAPI.getTopTracksOfArtist(artistId));
+
     }
 
 

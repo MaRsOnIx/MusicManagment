@@ -10,7 +10,6 @@ import lombok.EqualsAndHashCode;
 @Builder
 
 public class TrackDTO {
-
         private String id;
         private String name;
         private String image;
@@ -18,10 +17,5 @@ public class TrackDTO {
         private String artists;
         private int popularity;
         private boolean saved;
-
-
-
-
-
 
 }

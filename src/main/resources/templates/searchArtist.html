@@ -121,7 +121,7 @@
             text-align: center;
             display: table-cell;
             vertical-align: middle;
-            /*padding-top: 15px;*/
+            padding-top: 3px;
             font-size: 15px;
             font-weight: bold;
             color:white;
@@ -184,6 +184,7 @@
             font-weight: bold;
             color:white;
             cursor: pointer;
+            padding-top: 15px;
         }
 
 
@@ -234,7 +235,7 @@
 
         </div>
         <div class="rate2">
-            <img src="https://img.icons8.com/office/40/000000/rating.png">
+            <a th:href="${'/top?id=' + item.getId()}"> <img src="https://img.icons8.com/office/40/000000/rating.png"></a>
         </div>
 
     </div>
