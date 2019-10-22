@@ -18,4 +18,12 @@ public class TrackDTO {
         private int popularity;
         private boolean saved;
 
+        public boolean possibilityToPlay(){
+                return !link.equals("null");
+        }
+
+        public String getPlayableClasses(){
+                return possibilityToPlay() ? "show2 playable" : "show2";
+        }
+
 }

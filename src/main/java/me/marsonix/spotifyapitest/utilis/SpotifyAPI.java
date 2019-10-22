@@ -120,15 +120,15 @@ public class SpotifyAPI {
             case 400:
             case 401:
                 generateNewToken();
-                if(ai.getAndIncrement()>=5) {
-                    try {
-                        throw new SpotifyConnectionException("Problem with connection of WEB API Spotify.");
-                    } catch (SpotifyConnectionException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-                return getRespondedJson(url);
+//                if(ai.getAndIncrement()>=5) {
+//                    try {
+//                        throw new SpotifyConnectionException("Problem with connection of WEB API Spotify.");
+//                    } catch (SpotifyConnectionException e) {
+//                        e.printStackTrace();
+//                    }
+//                    return null;
+//                }
+//                return getRespondedJson(url);
         }
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
 

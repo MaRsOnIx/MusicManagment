@@ -1,30 +1,35 @@
 package me.marsonix.spotifyapitest.logger;
 
-import lombok.Data;
 
-import java.time.LocalDate;
-import java.util.concurrent.atomic.AtomicLong;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+import java.time.LocalDateTime;
 
-@Data
+@Entity
 public class Log {
 
+    @Id
+    @GeneratedValue
     private Long id;
     private String message;
     private Type type;
-    private LocalDate localDate;
+    private LocalDateTime expiredDate;
 
-    private static AtomicLong al = new AtomicLong();
+    public Log() {
+    }
 
-    public Log(String message, Type type, LocalDate localDate) {
-        this.id=al.getAndIncrement();
+    public Log(Long id, String message, Type type, LocalDateTime expiredDate) {
+        this.id = id;
         this.message = message;
         this.type = type;
-        this.localDate = localDate;
+        this.expiredDate = expiredDate;
     }
 
     public Long getId() {
         return id;
     }
+
 
     public String getMessage() {
         return message;
@@ -40,13 +45,24 @@ public class Log {
 
     public void setType(Type type) {
         this.type = type;
+
     }
 
-    public LocalDate getLocalDate() {
-        return localDate;
+    public LocalDateTime getExpiredDate() {
+        return expiredDate;
     }
 
-    public void setLocalDate(LocalDate localDate) {
-        this.localDate = localDate;
+    public void setExpiredDate(LocalDateTime expiredDate) {
+        this.expiredDate = expiredDate;
+    }
+
+    @Override
+    public String toString() {
+        return "Log{" +
+                "id=" + id +
+                ", message='" + message + '\'' +
+                ", type=" + type +
+                ", expiredDate=" + expiredDate +
+                '}';
     }
 }

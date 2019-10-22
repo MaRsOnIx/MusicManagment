@@ -26,7 +26,7 @@ public class TopController {
     private SearchService searchService;
 
     @GetMapping
-    public String search(@RequestParam String id, Model model) throws IOException, MissingPropertyException {
+    public String search(@RequestParam String id, Model model) throws IOException {
         model.addAttribute("container", searchService.getTopTracks(id));
         return "searchTrack";
 

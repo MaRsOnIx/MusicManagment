@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Service
 public class LogManager {
@@ -18,23 +19,31 @@ public class LogManager {
     }
 
 
-    // I know that I could create custom logger using slf4j libraries but I prefered to use faster way
+    public void info(String message, Class cl){
+        Log log = new Log();
+        log.setType(Type.INFO);
+        log.setMessage(message);
+        log.setExpiredDate(LocalDateTime.now().plusHours(1));
+        save(log, cl);
+    }
 
-    public void save(String message, Type type, LocalDate localDate, Class cl){
+    public void searchTest(){
+        logRepository.findAll().forEach(System.out::println);
+    }
 
-        Log log = new Log(message, type, localDate);
+    private void save(Log log, Class cl){
 
         logRepository.save(log);
         Logger logger = LoggerFactory.getLogger(cl);
         switch (log.getType()) {
             case INFO:
-                logger.info(message);
+                logger.info(log.getMessage());
                 return;
             case WARING:
-                logger.warn(message);
+                logger.warn(log.getMessage());
                 break;
             case ERROR:
-                logger.error(message);
+                logger.error(log.getMessage());
                 break;
         }
 

@@ -10,7 +10,7 @@
         const stop = 'https://img.icons8.com/color/64/000000/stop.png';
         $( document ).ready(function() {
 
-            $(".show2").click(function(){
+            $(".playable").click(function(){
                 if(recent!=null){
                     $(recent).find("img").attr('src', play);
                     audio[0].pause();
@@ -257,8 +257,8 @@
     <div class="popularity2">
         <img th:each="i: ${#numbers.sequence(0, item.getPopularity(), 1)}" src="https://img.icons8.com/doodle/32/000000/star--v2.png">
     </div>
-    <div class="show2"> <audio th:src="${item.getLink()}"></audio>
-        <img src="https://img.icons8.com/color/64/000000/play.png"></div>
+    <div th:class="${item.getPlayableClasses()}"> <audio th:src="${item.getLink()}"></audio>
+        <img th:src="${item.possibilityToPlay() ? 'https://img.icons8.com/color/64/000000/play.png' : ''}"></div>
     <div th:id="${item.getId()}" th:class="${item.isSaved()}? 'rate2 far' : 'rate2'">
         <img th:src="${item.isSaved()}? 'https://img.icons8.com/plasticine/64/000000/filled-trash.png'  : 'https://img.icons8.com/plasticine/64/000000/likes-folder.png'">
     </div>
