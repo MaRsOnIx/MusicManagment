@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<!-- saved from url=(0026)http://pvp.iq.pl:8080/#_=_ -->
-<html lang="pl"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<html xmlns:th="http://www.thymeleaf.org" lang="pl">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
     <style>
 
@@ -33,7 +34,7 @@
 		  border: white;
 		  border-style: solid;
 		  }
-		#srodek {
+		.srodek {
 			float:left;
 			background-color:#333;
 			width:100%;
@@ -53,17 +54,17 @@
 <body>
 
 <div id="caly_blok">
-    <div id="naglowek"><b>Witaj, <span>Sławomir Rychłowski</span>!</b></div>
-    <div id="srodek"><p>Wyszukiwarka</p>
-            <form action="http://pvp.iq.pl:8080/search" method="get">
+    <div id="naglowek"><b>Witaj, <span th:text="${name}"/>!</b></div>
+    <div class="srodek"><p>Wyszukiwarka</p>
+        <form th:action="@{/search}"method="get">
                 <input placeholder="Nazwa" name="content"> <br><br>
                 <select name="type"><option value="TRACK">Utwór</option><option value="ARTIST">Autora</option></select> <br><br>
                 <input type="submit" value="Wyszukaj">
             </form>
 	</div>
-	<div id="srodek">
+	<div class="srodek">
 			<p>Ulubione</p>
-            <form action="http://pvp.iq.pl:8080/farvorites">
+        <form th:action="@{/farvorites}">
                 <input type="submit" value="Zobacz">
             </form>
 	</div>

@@ -1,7 +1,6 @@
 package me.marsonix.spotifyapitest.models.user;
 
 
-import me.marsonix.spotifyapitest.models.spotify.Track;
 
 import javax.persistence.*;
 import java.util.List;

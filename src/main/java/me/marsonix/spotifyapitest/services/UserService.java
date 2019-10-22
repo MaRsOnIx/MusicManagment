@@ -1,6 +1,7 @@
 package me.marsonix.spotifyapitest.services;
 
 import me.marsonix.spotifyapitest.exceptions.TrackNotFoundException;
+import me.marsonix.spotifyapitest.logger.LogManager;
 import me.marsonix.spotifyapitest.models.spotify.Track;
 import me.marsonix.spotifyapitest.models.user.User;
 import me.marsonix.spotifyapitest.repo.UserRepository;

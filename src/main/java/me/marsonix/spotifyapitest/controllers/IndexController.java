@@ -1,8 +1,6 @@
 package me.marsonix.spotifyapitest.controllers;
 
-import me.marsonix.spotifyapitest.logger.Log;
 import me.marsonix.spotifyapitest.logger.LogManager;
-import me.marsonix.spotifyapitest.logger.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
@@ -13,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.LinkedHashMap;
 
 @Controller
-public class IndexController {
+class IndexController {
 
     @Autowired
     private LogManager logManager;
@@ -25,7 +23,7 @@ public class IndexController {
                 .getAuthentication())
                 .getUserAuthentication())
                 .getDetails();
-        logManager.info("Testuje sobie", getClass());
+        logManager.userInfo("has opened index page", getClass());
         String name = details.values().toArray()[1].toString();
         model.addAttribute("name", name);
         return "index";

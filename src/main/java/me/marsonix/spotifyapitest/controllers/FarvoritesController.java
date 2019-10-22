@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("farvorites")
-public class FarvoritesController {
+class FarvoritesController {
 
 
     @Autowired
@@ -43,7 +43,7 @@ public class FarvoritesController {
                         .content("Ulubione").items(trackList.stream()
                         .map(v -> searchService.trackToTransfer(v)).collect(Collectors.toList()))
                         .nextUrl("null").previousUrl("null").total(trackList.size()).build();
-
+        logManager.userInfo("has opened farvorite page", getClass());
         model.addAttribute("container", containerTrackDTO);
 
         return "searchTrack";
