@@ -56,7 +56,8 @@ public class SpotifyAPI {
 
     private Optional<String> token = Optional.empty();
 
-    private String generateNewToken() throws IOException {
+
+    private Optional<String> generateNewToken() throws IOException {
 
         String code = null;
         try {
@@ -81,7 +82,7 @@ public class SpotifyAPI {
         BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
         JsonNode jsonNode = new ObjectMapper().readTree(rd.readLine());
 
-        return jsonNode.get("access_token").asText();
+        return jsonNode.hasNonNull("access_token")?Optional.of(jsonNode.get("access_token").asText()):Optional.empty();
     }
 
     public Container getItem(Search search) throws IOException{
@@ -105,8 +106,20 @@ public class SpotifyAPI {
 
     private AtomicInteger ai = new AtomicInteger();
 
+    private boolean checkSpotifyKeys(){
+        if(!token.isPresent()) try {
+            throw new SpotifyConnectionException("ClientId or SecredId in application.properties is wrong," +
+                    " you have to check this data and correct them.");
+        } catch (SpotifyConnectionException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
     private JsonNode getRespondedJson(String url) throws IOException{
-        if(!token.isPresent())token=Optional.of(generateNewToken());
+        if(!token.isPresent())token=generateNewToken();
+        if(!checkSpotifyKeys()) return null;
         HttpClient client = HttpClientBuilder.create().build();
         HttpGet request = new HttpGet(url);
 
@@ -118,7 +131,7 @@ public class SpotifyAPI {
         switch(response.getStatusLine().getStatusCode()){
             case 400:
             case 401:
-                generateNewToken();
+                token=generateNewToken();
                 if(ai.getAndIncrement()>=2) {
                     try {
                         throw new SpotifyConnectionException("Problem with connection of WEB API Spotify.");
