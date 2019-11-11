@@ -90,9 +90,10 @@ public class SpotifyManager {
                 e.printStackTrace();
                 return null;
             }
+            generateNewToken();
             return getRespondedJson(url);
         }
-        ai.set(0);
+        if(ai.get()!=0) ai.set(0);
         return response.getData();
     }
 
