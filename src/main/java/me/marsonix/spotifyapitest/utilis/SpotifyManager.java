@@ -2,90 +2,49 @@ package me.marsonix.spotifyapitest.utilis;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import me.marsonix.spotifyapitest.exceptions.MissingPropertyException;
 import me.marsonix.spotifyapitest.exceptions.SpotifyConnectionException;
 import me.marsonix.spotifyapitest.exceptions.TrackNotFoundException;
 import me.marsonix.spotifyapitest.models.spotify.*;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
+import me.marsonix.spotifyapitest.utilis.spotify.http.AbstractPreparedRequest;
+import me.marsonix.spotifyapitest.utilis.spotify.http.GetRequest;
+import me.marsonix.spotifyapitest.utilis.spotify.http.Response;
+import me.marsonix.spotifyapitest.utilis.spotify.token.BasicToken;
+import me.marsonix.spotifyapitest.utilis.spotify.token.BearerToken;
+import me.marsonix.spotifyapitest.utilis.spotify.token.Token;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Repository;
+import org.springframework.stereotype.Component;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.URLEncoder;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import static org.springframework.http.HttpHeaders.USER_AGENT;
-
-@Repository
-public class SpotifyAPI {
+@Component
+public class SpotifyManager {
 
 
     @Value("${security.oauth2.client.client-id}")
-    private Optional<char[]> clientId;
+    private char[] clientId;
     @Value("${security.oauth2.client.client-secret}")
-    private Optional<char[]> secretId;
+    private char[] secretId;
     @Value("${security.oauth2.client.access-token-uri}")
-    private Optional<String> tokenUrl;
+    private String tokenUrl;
+
+    private ObjectMapper objectMapper = new ObjectMapper();
+    private Token basicToken;
+    private Token bearerToken;
 
 
-
-
-    private Optional<char[]> getBasicEncodedKey() throws MissingPropertyException {
-
-        return Optional.of(Base64.getEncoder()
-                .encodeToString(String.join("",
-                        String.valueOf(clientId.orElseThrow(() ->
-                                        new MissingPropertyException("Property {security.oauth2.client.client-id} is missing.")))
-                        ,":",
-                        String.valueOf(secretId.orElseThrow(()->
-                                        new MissingPropertyException("Property {security.oauth2.client.client-secret} is missing.")))
-                ).getBytes()).toCharArray());
+    private BasicToken getBasicToken() {
+        if(basicToken==null)
+            basicToken=new BasicToken(clientId, secretId);
+        return (BasicToken) basicToken;
+    }
+    private void generateNewToken() {
+        bearerToken=new BearerToken(getBasicToken(), tokenUrl, objectMapper);
     }
 
-    private Optional<String> token = Optional.empty();
-
-
-    private Optional<String> generateNewToken() throws IOException {
-
-        String code = null;
-        try {
-            code = String.valueOf(getBasicEncodedKey().get());
-        } catch (MissingPropertyException e) {
-            e.printStackTrace();
-        }
-        CloseableHttpClient client = HttpClients.createDefault();
-        HttpPost request = null;
-        try {
-            request = new HttpPost(tokenUrl.orElseThrow(() ->
-                    new MissingPropertyException("Property {security.oauth2.client.access-token-uri} is missing.")));
-        } catch (MissingPropertyException e) {
-            e.printStackTrace();
-        }
-
-        request.addHeader("Authorization", "Basic " + code);
-        request.addHeader("Accept", "application/json");
-        request.setEntity(new UrlEncodedFormEntity(Collections.singletonList(new BasicNameValuePair("grant_type", "client_credentials"))));
-
-        HttpResponse response = client.execute(request);
-        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-        JsonNode jsonNode = new ObjectMapper().readTree(rd.readLine());
-
-        return jsonNode.hasNonNull("access_token")?Optional.of(jsonNode.get("access_token").asText()):Optional.empty();
-    }
-
-    public Container getItem(Search search) throws IOException{
+    public Container getItem(Search search) throws IOException {
         return getItemsFroumUrl("https://api.spotify.com/v1/search?q=" +
                 URLEncoder.encode(search.getContent(), "UTF-8") +
                 "&type="+search.getType().name().toLowerCase()+"&limit=" +
@@ -94,20 +53,21 @@ public class SpotifyAPI {
                 search.getOffset(), search);
         }
 
-   public Track getTrack(String id) throws IOException, TrackNotFoundException {
-        return getTrackFromJson(getRespondedJson("https://api.spotify.com/v1/tracks/"+id));
+   public Track getTrack(String id) throws TrackNotFoundException {
+        return getTrackFromJson(Objects.requireNonNull(
+                getRespondedJson("https://api.spotify.com/v1/tracks/" + id)));
     }
 
-
-    public Container getTopTracksOfArtist(String artistId) throws IOException {
-        return jsonTracksToContainer(getRespondedJson("https://api.spotify.com/v1/artists/"+artistId+"/top-tracks?country=PL"),"Top");
+    public Container getTopTracksOfArtist(String artistId) {
+        return jsonTracksToContainer(Objects.requireNonNull(
+                getRespondedJson("https://api.spotify.com/v1/artists/" + artistId + "/top-tracks?country=PL"))
+                ,"Top");
     }
-
 
     private AtomicInteger ai = new AtomicInteger();
 
     private boolean checkSpotifyKeys(){
-        if(!token.isPresent()) try {
+        if(!bearerToken.get().isPresent()) try {
             throw new SpotifyConnectionException("ClientId or SecredId in application.properties is wrong," +
                     " you have to check this data and correct them.");
         } catch (SpotifyConnectionException e) {
@@ -117,37 +77,26 @@ public class SpotifyAPI {
         return true;
     }
 
-    private JsonNode getRespondedJson(String url) throws IOException{
-        if(!token.isPresent())token=generateNewToken();
+    private JsonNode getRespondedJson(String url) {
+        if(bearerToken==null || !bearerToken.get().isPresent()) generateNewToken();
         if(!checkSpotifyKeys()) return null;
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpGet request = new HttpGet(url);
-
-        request.addHeader("User-Agent", USER_AGENT);
-        request.addHeader("Authorization", "Bearer " + token.get());
-        request.addHeader("Accept", "application/json");
-        HttpResponse response = client.execute(request);
-
-        switch(response.getStatusLine().getStatusCode()){
-            case 400:
-            case 401:
-                token=generateNewToken();
-                if(ai.getAndIncrement()>=2) {
-                    try {
-                        throw new SpotifyConnectionException("Problem with connection of WEB API Spotify.");
-                    } catch (SpotifyConnectionException e) {
-                        e.printStackTrace();
-                    }
-                    return null;
-                }
-                return getRespondedJson(url);
+        GetRequest getRequest = new GetRequest(url,
+                AbstractPreparedRequest.Type.BEARER, bearerToken, objectMapper);
+        Response response;
+        try {
+            response = getRequest.get();
+        } catch (IOException |SpotifyConnectionException e) {
+            if(ai.getAndIncrement()>3){
+                e.printStackTrace();
+                return null;
+            }
+            return getRespondedJson(url);
         }
-        BufferedReader rd = new BufferedReader(new InputStreamReader(response.getEntity().getContent()));
-
-        return objectMapper.readTree(rd.lines().collect(Collectors.joining()));
+        ai.set(0);
+        return response.getData();
     }
 
-    private Container getItemsFroumUrl(String url, Search search) throws IOException {
+    private Container getItemsFroumUrl(String url, Search search) {
 
         JsonNode json = getRespondedJson(url);
         if(json==null)return createStandardContainer("", objectMapper.createObjectNode(), search.getType());
@@ -155,7 +104,6 @@ public class SpotifyAPI {
 
         return jsonArtistsToContainer(json, search.getContent());
     }
-
 
     private Container createStandardContainer(String content, JsonNode node, Type type){
         Container container = new Container();
@@ -167,8 +115,6 @@ public class SpotifyAPI {
         container.setType(type);
         return container;
     }
-
-    private ObjectMapper objectMapper = new ObjectMapper();
 
     private Container jsonTracksToContainer(JsonNode json, String content) {
 
@@ -184,11 +130,10 @@ public class SpotifyAPI {
                 try {
                     itemList.add(getTrackFromJson(nextValue));
                 }catch (TrackNotFoundException ev){
-
+                    ev.printStackTrace();
                 }
             }
         }
-
         return container;
 
     }
@@ -210,18 +155,14 @@ public class SpotifyAPI {
                 artists.add(Artist.builder().id(idArt).name(nameArt).build());
             }
         }
-
         if (nextValue.hasNonNull("album")) {
             JsonNode album = nextValue.get("album");
             image=getImageFromJson(album);
         }
-
         return Track.builder().id(id).image(image.orElse(""))
                 .name(name).artists(artists).link(link)
                 .popularity(popularity).build();
     }
-
-
 
     private Container jsonArtistsToContainer(JsonNode json, String content)  {
 
@@ -247,18 +188,14 @@ public class SpotifyAPI {
                     followers = nextValue.get("followers").get("total").asInt();
                 }
 
-                itemList.add(Artist.builder().id(id).image(image.orElse("")).name(name).followers(followers).link(link.orElse("")).popularity(popularity).link(link.orElse("")).build());
-
+                itemList.add(Artist.builder().id(id).image(image.orElse(""))
+                        .name(name).followers(followers).link(link.orElse(""))
+                        .popularity(popularity).link(link.orElse("")).build());
             }
-
-
-
         }
 
         return container;
-
     }
-
 
     private Optional<String> getImageFromJson(JsonNode json){
         if (json.hasNonNull("images") && json.get("images").isArray()) {
@@ -269,17 +206,6 @@ public class SpotifyAPI {
                 }
             }
         }
-    return Optional.of("https://img.icons8.com/color/64/000000/gender-neutral-user.png");
+    return Optional.of("web/profile.png");
     }
-
-
-
-
-
-
-
-
-
-
-
 }

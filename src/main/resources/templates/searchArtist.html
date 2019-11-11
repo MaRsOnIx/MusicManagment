@@ -2,41 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 
 <head>
-    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
-    <script th:inline="javascript">
-        let audio;
-        let recent;
-        const play = 'https://img.icons8.com/color/64/000000/play.png';
-        const stop = 'https://img.icons8.com/color/64/000000/stop.png';
-        $( document ).ready(function() {
-
-            $(".show2").click(function(){
-                if(recent!=null){
-                    $(recent).find("img").attr('src', play);
-                    audio[0].pause();
-
-                }
-                audio = $(this).find("audio");
-
-
-
-                if(recent==null){
-                    audio[0].play();
-                    $(this).find("img").attr('src', stop);
-                    recent=this;
-                }else{
-                    audio[0].pause();
-                    $(this).find("img").attr('src', play);
-                    recent=null;
-                }
-            });
-
-
-        });
-        //    var container = /*[[${container}]]*/ 'container';
-
-
-    </script>
     <style>
 
         h1{
@@ -198,16 +163,10 @@
         }
 
 
-
-
-
-
-
     </style>
 
 </head>
 
-<body>
 
 <div id ="banner">
 
@@ -225,24 +184,24 @@
         <div class="followers2" th:text="${item.getFollowers()}">
         </div>
         <div class="popularity2">
-            <img th:each="i: ${#numbers.sequence(0, item.getPopularity(), 1)}" src="https://img.icons8.com/doodle/32/000000/star--v2.png">
+            <img th:each="i: ${#numbers.sequence(0, item.getPopularity(), 1)}" src="web/star--v2.png">
         </div>
         <div class="show2"> <a th:href="${item.getLink()}" target="_blank">
 
-            <img src="https://img.icons8.com/officel/40/000000/edit-user-female.png">
+            <img src="web/edit-user-female.png">
         </a>
 
 
         </div>
         <div class="rate2">
-            <a th:href="${'/top?id=' + item.getId()}"> <img src="https://img.icons8.com/office/40/000000/rating.png"></a>
+            <a th:href="${'/top?id=' + item.getId()}"> <img src="web/rating.png"></a>
         </div>
 
     </div>
 
 
 
+</div>
 </body>
-
 
 </html>

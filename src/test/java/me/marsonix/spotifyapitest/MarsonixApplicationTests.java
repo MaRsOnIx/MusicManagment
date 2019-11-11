@@ -1,10 +1,9 @@
 package me.marsonix.spotifyapitest;
 
 import me.marsonix.spotifyapitest.models.spotify.Container;
-import me.marsonix.spotifyapitest.models.spotify.Item;
 import me.marsonix.spotifyapitest.models.spotify.Search;
 import me.marsonix.spotifyapitest.models.spotify.Type;
-import me.marsonix.spotifyapitest.utilis.SpotifyAPI;
+import me.marsonix.spotifyapitest.utilis.SpotifyManager;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,7 +15,7 @@ import java.io.IOException;
 class MarsonixApplicationTests {
 
     @Autowired
-    private SpotifyAPI spotifyAPI;
+    private SpotifyManager spotifyManager;
 
     private Search createAnySearch(){
 
@@ -29,44 +28,23 @@ class MarsonixApplicationTests {
 
     @Test
     void gettingContainerFromTopListOfArtistNotNull(){
-        Container container = null;
-        try {
-            container = spotifyAPI.getTopTracksOfArtist(getAnyArtistId());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Container container = spotifyManager.getTopTracksOfArtist(getAnyArtistId());
         Assert.notNull(container, "Testing getting data not null from Spotify Web API");
     }
 
     @Test
-    void gettingContainerFromSearchingItemNotNull(){
-        Container container = null;
-        try {
-            container = spotifyAPI.getItem(createAnySearch());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    void gettingContainerFromSearchingItemNotNull() throws IOException {
+        Container container = spotifyManager.getItem(createAnySearch());
         Assert.notNull(container, "Testing getting data not null from Spotify Web API");
     }
     @Test
-    void checkContainerFromSearchingItemWorking(){
-        Container container = null;
-        try {
-            container = spotifyAPI.getItem(createAnySearch());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
+    void checkContainerFromSearchingItemWorking() throws IOException{
+        Container container = spotifyManager.getItem(createAnySearch());
         Assert.isTrue(!container.getItems().isEmpty(), "Testing getting data from searching are true");
     }
     @Test
     void gettingContainerFromTopListOfArtistWroking(){
-        Container container = null;
-        try {
-            container = spotifyAPI.getTopTracksOfArtist(getAnyArtistId());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        Container container = spotifyManager.getTopTracksOfArtist(getAnyArtistId());
         Assert.isTrue(!container.getItems().isEmpty(), "Testing getting data are true");
     }
 

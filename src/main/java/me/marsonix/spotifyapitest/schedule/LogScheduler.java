@@ -1,8 +1,8 @@
 package me.marsonix.spotifyapitest.schedule;
 
+import lombok.AllArgsConstructor;
 import me.marsonix.spotifyapitest.logger.Log;
 import me.marsonix.spotifyapitest.logger.LogRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -10,10 +10,10 @@ import java.time.LocalDateTime;
 
 
 @Component
+@AllArgsConstructor
 public class LogScheduler {
 
-    @Autowired
-    LogRepository logRepository;
+    private LogRepository logRepository;
 
     @Scheduled(fixedRate = 60000)
     public void removing(){

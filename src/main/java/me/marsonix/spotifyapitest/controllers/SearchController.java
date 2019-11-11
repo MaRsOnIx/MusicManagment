@@ -1,10 +1,11 @@
 package me.marsonix.spotifyapitest.controllers;
 
+import lombok.AllArgsConstructor;
+import me.marsonix.spotifyapitest.exceptions.SpotifyConnectionException;
 import me.marsonix.spotifyapitest.logger.LogManager;
 import me.marsonix.spotifyapitest.models.spotify.Search;
 import me.marsonix.spotifyapitest.models.spotify.Type;
 import me.marsonix.spotifyapitest.services.SearchService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -12,18 +13,21 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 
 @Controller
+@AllArgsConstructor
 @RequestMapping("search")
 class SearchController {
 
 
-    @Autowired
     private LogManager logManager;
-
-    @Autowired
     private SearchService searchService;
 
     @GetMapping
-    public String search(@RequestParam String content, @RequestParam  Type type, @RequestParam(required = false, defaultValue = "0") Integer offset, Model model) throws IOException{
+    public String search(@RequestParam String content,
+                         @RequestParam  Type type,
+                         @RequestParam(required = false,
+                                 defaultValue = "0") Integer offset,
+                         Model model) throws IOException,
+            SpotifyConnectionException {
 
         if(content.trim().equals("")) return "redirect:/";
 

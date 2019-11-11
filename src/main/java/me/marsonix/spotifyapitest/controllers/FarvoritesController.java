@@ -1,11 +1,11 @@
 package me.marsonix.spotifyapitest.controllers;
 
+import lombok.AllArgsConstructor;
 import me.marsonix.spotifyapitest.logger.LogManager;
 import me.marsonix.spotifyapitest.models.dtos.ContainerTrackDTO;
 import me.marsonix.spotifyapitest.models.spotify.Track;
 import me.marsonix.spotifyapitest.services.SearchService;
 import me.marsonix.spotifyapitest.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
@@ -19,14 +19,12 @@ import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("farvorites")
+@AllArgsConstructor
 class FarvoritesController {
 
 
-    @Autowired
     private LogManager logManager;
-    @Autowired
     private UserService userService;
-    @Autowired
     private SearchService searchService;
 
     @GetMapping

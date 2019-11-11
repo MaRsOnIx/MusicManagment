@@ -1,20 +1,18 @@
 package me.marsonix.spotifyapitest.logger;
 
+import lombok.AllArgsConstructor;
 import me.marsonix.spotifyapitest.services.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
+@AllArgsConstructor
 public class LogManager {
 
-    @Autowired
     private LogRepository logRepository;
-
-    @Autowired
     private UserService userService;
 
     public void userInfo(String message, Class cl){

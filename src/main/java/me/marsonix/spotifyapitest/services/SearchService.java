@@ -1,5 +1,6 @@
 package me.marsonix.spotifyapitest.services;
 
+import lombok.AllArgsConstructor;
 import me.marsonix.spotifyapitest.models.spotify.Artist;
 import me.marsonix.spotifyapitest.models.spotify.Container;
 import me.marsonix.spotifyapitest.models.spotify.Search;
@@ -8,8 +9,7 @@ import me.marsonix.spotifyapitest.models.dtos.ArtistDTO;
 import me.marsonix.spotifyapitest.models.dtos.ContainerArtistDTO;
 import me.marsonix.spotifyapitest.models.dtos.ContainerTrackDTO;
 import me.marsonix.spotifyapitest.models.dtos.TrackDTO;
-import me.marsonix.spotifyapitest.utilis.SpotifyAPI;
-import org.springframework.beans.factory.annotation.Autowired;
+import me.marsonix.spotifyapitest.utilis.SpotifyManager;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,16 +17,15 @@ import java.util.stream.Collectors;
 
 
 @Service
+@AllArgsConstructor
 public class SearchService {
 
-    @Autowired
-    private SpotifyAPI spotifyAPI;
-    @Autowired
+    private SpotifyManager spotifyManager;
     private UserService userService;
 
 
     public ContainerTrackDTO getTracks(Search search) throws IOException {
-        return getTracks(spotifyAPI.getItem(search));
+        return getTracks(spotifyManager.getItem(search));
     }
 
 
@@ -63,7 +62,7 @@ public class SearchService {
 
 
     public ContainerArtistDTO getArtists(Search search) throws IOException {
-        Container container = spotifyAPI.getItem(search);
+        Container container = spotifyManager.getItem(search);
 
         return ContainerArtistDTO.builder()
                 .content(container.getContent())
@@ -85,8 +84,8 @@ public class SearchService {
                 .build();
     }
 
-    public ContainerTrackDTO getTopTracks(String artistId) throws IOException {
-        return getTracks(spotifyAPI.getTopTracksOfArtist(artistId));
+    public ContainerTrackDTO getTopTracks(String artistId) {
+        return getTracks(spotifyManager.getTopTracksOfArtist(artistId));
 
     }
 

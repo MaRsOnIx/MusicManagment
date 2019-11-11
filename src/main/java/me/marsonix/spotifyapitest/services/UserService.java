@@ -1,28 +1,25 @@
 package me.marsonix.spotifyapitest.services;
 
+import lombok.AllArgsConstructor;
 import me.marsonix.spotifyapitest.exceptions.TrackNotFoundException;
-import me.marsonix.spotifyapitest.logger.LogManager;
 import me.marsonix.spotifyapitest.models.spotify.Track;
 import me.marsonix.spotifyapitest.models.user.User;
 import me.marsonix.spotifyapitest.repo.UserRepository;
-import me.marsonix.spotifyapitest.utilis.SpotifyAPI;
-import org.springframework.beans.factory.annotation.Autowired;
+import me.marsonix.spotifyapitest.utilis.SpotifyManager;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class UserService {
 
-    @Autowired
-    private SpotifyAPI spotifyAPI;
-    @Autowired
+    private SpotifyManager spotifyManager;
     private UserRepository userRepository;
 
     public List<Track>getFarvoritesTracks(String id){
@@ -38,8 +35,8 @@ public class UserService {
 
     private Track stringToTrack(String stringToTrack) {
         try {
-            return spotifyAPI.getTrack(stringToTrack);
-        } catch (IOException | TrackNotFoundException e) {
+            return spotifyManager.getTrack(stringToTrack);
+        } catch (TrackNotFoundException e) {
             e.printStackTrace();
         }
         return null;
@@ -79,7 +76,7 @@ public class UserService {
         return user;
     }
 
-    public boolean containsTrack(Track track){
+    boolean containsTrack(Track track){
         User user;
         if(userRepository.existsById(getUserId())){
             user=userRepository.findById(getUserId()).get();

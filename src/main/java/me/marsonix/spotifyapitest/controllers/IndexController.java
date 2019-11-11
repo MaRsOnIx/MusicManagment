@@ -1,7 +1,7 @@
 package me.marsonix.spotifyapitest.controllers;
 
+import lombok.AllArgsConstructor;
 import me.marsonix.spotifyapitest.logger.LogManager;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 import org.springframework.stereotype.Controller;
@@ -11,9 +11,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.util.LinkedHashMap;
 
 @Controller
+@AllArgsConstructor
 class IndexController {
 
-    @Autowired
     private LogManager logManager;
 
     @GetMapping

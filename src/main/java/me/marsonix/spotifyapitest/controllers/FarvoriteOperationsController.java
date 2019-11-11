@@ -1,20 +1,19 @@
 package me.marsonix.spotifyapitest.controllers;
 
 
+import lombok.AllArgsConstructor;
 import me.marsonix.spotifyapitest.logger.LogManager;
 import me.marsonix.spotifyapitest.services.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 
 @RequestMapping("farvoritesOperations")
 @RestController
+@AllArgsConstructor
 class FarvoriteOperationsController {
 
-    @Autowired
-    UserService userService;
-    @Autowired
-    LogManager logManager;
+    private UserService userService;
+    private LogManager logManager;
 
     @PostMapping ("{id}")
     public boolean add(@PathVariable String id){
